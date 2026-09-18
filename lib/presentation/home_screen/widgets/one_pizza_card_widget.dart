@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-class OnePizzaCardWidget extends StatefulWidget {
+class OnePizzaCardWidget extends StatelessWidget {
   final String? name;
   final String? description;
   final String? imagePath;
   final String? price;
   final int quantity;
-  final ValueChanged<int>? onQuantityChanged;
+  final VoidCallback onAdd;
+  final VoidCallback onMinus;
 
   const OnePizzaCardWidget({
     super.key,
@@ -15,34 +16,13 @@ class OnePizzaCardWidget extends StatefulWidget {
     required this.imagePath,
     required this.price,
     required this.quantity,
-    this.onQuantityChanged,
+    required this.onAdd,
+    required this.onMinus,
   });
 
   @override
-  State<OnePizzaCardWidget> createState() => _OnePizzaCardWidgetState();
-}
-
-class _OnePizzaCardWidgetState extends State<OnePizzaCardWidget> {
-  late int quantity;
-
-  @override
-  void initState() {
-    super.initState();
-    quantity = widget.quantity;
-  }
-
-  void changeQuantity(int value) {
-    if (value < 0) return;
-
-    setState(() {
-      quantity = value;
-    });
-    widget.onQuantityChanged?.call(value);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final imagePath = widget.imagePath;
+    final path = imagePath;
 
     const pizzaIcon = Center(
       child: Icon(
@@ -60,9 +40,9 @@ class _OnePizzaCardWidgetState extends State<OnePizzaCardWidget> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (imagePath != null && imagePath.isNotEmpty)
+            if (path != null && path.isNotEmpty)
               Image.asset(
-                imagePath,
+                path,
                 height: 90,
                 width: double.infinity,
                 fit: BoxFit.contain,
@@ -74,7 +54,7 @@ class _OnePizzaCardWidgetState extends State<OnePizzaCardWidget> {
               pizzaIcon,
             const SizedBox(height: 12),
             Text(
-              widget.name ?? 'Pizza',
+              name ?? 'Pizza',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -84,14 +64,14 @@ class _OnePizzaCardWidgetState extends State<OnePizzaCardWidget> {
             ),
             const SizedBox(height: 8),
             Text(
-              widget.description ?? '',
+              description ?? '',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 12),
             ),
             const Spacer(),
             Text(
-              widget.price ?? 'Price unavailable',
+              price ?? 'Price unavailable',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 16),
@@ -102,7 +82,7 @@ class _OnePizzaCardWidgetState extends State<OnePizzaCardWidget> {
               width: double.infinity,
               child: quantity == 0
                   ? ElevatedButton(
-                      onPressed: () => changeQuantity(1),
+                      onPressed: onAdd,
                       child: const Text('Add'),
                     )
                   : Row(
@@ -111,7 +91,7 @@ class _OnePizzaCardWidgetState extends State<OnePizzaCardWidget> {
                       children: [
                         IconButton(
                           tooltip: 'Remove one',
-                          onPressed: () => changeQuantity(quantity - 1),
+                          onPressed: onMinus,
                           icon: const Icon(Icons.remove),
                         ),
                         Flexible(
@@ -122,7 +102,7 @@ class _OnePizzaCardWidgetState extends State<OnePizzaCardWidget> {
                         ),
                         IconButton(
                           tooltip: 'Add one',
-                          onPressed: () => changeQuantity(quantity + 1),
+                          onPressed: onAdd,
                           icon: const Icon(Icons.add),
                         ),
                       ],

@@ -1,30 +1,43 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:decision_jar_project/presentation/state/pizza_bloc.dart';
+import 'package:decision_jar_project/presentation/state/pizza_bloc_events.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:decision_jar_project/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('Basket updates preserve old states and calculate mixed prices', () async {
+    final bloc = PizzaBloc(prices: {1: 1099, 2: 1299});
+    addTearDown(bloc.close);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    Future<void> send(PizzaEvents event) async {
+      final next = bloc.stream.first;
+      bloc.add(event);
+      await next;
+    }
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await send(AddPizzaEvent(1));
+    final previous = bloc.state;
+    await send(AddPizzaEvent(1));
+    await send(AddPizzaEvent(2));
+    expect(previous.quantities, {1: 1});
+    expect(bloc.state.totalPrice, 3497);
+    expect(bloc.state.totalQuantity, 3);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await send(MinusPizzaEvent(2));
+    expect(bloc.state.quantities, {1: 2});
+    expect(bloc.state.totalPrice, 2198);
+    await send(ClearBasketEvent());
+    expect(bloc.state.quantities, isEmpty);
+    expect(bloc.state.totalPrice, 0);
+    expect(bloc.state.totalQuantity, 0);
+  });
+
+  test('Unknown pizzas and subtracting from an empty basket do nothing', () async {
+    final bloc = PizzaBloc(prices: {1: 1099});
+    final states = [];
+    final subscription = bloc.stream.listen(states.add);
+    bloc.add(AddPizzaEvent(99));
+    bloc.add(MinusPizzaEvent(1));
+    await bloc.close();
+    expect(states, isEmpty);
+    await subscription.cancel();
   });
 }
