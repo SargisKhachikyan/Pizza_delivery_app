@@ -34,4 +34,22 @@ const pizzas = [
       description: 'Loaded with fresh vegetables and cheese',
       imagePath: 'assets/pizzas_pictures/3.png',
       price: 1199),
+  Pizza(
+      description: 'Loaded with fresh vegetables and cheese',
+      id: 4,
+      imagePath: 'assets/pizzas_pictures/4.png',
+      name: 'Hawaiian',
+      price: 1399),
+  Pizza(
+      id: 5,
+      name: 'BBQ Chicken',
+      description: 'Grilled chicken with BBQ sauce and cheese',
+      imagePath: 'assets/pizzas_pictures/5.png',
+      price: 1499),
+  Pizza(
+      id: 6,
+      name: 'Meat Lovers',
+      description: 'Loaded with various meats and cheese',
+      imagePath: 'assets/pizzas_pictures/6.png',
+      price: 1599),
 ];
