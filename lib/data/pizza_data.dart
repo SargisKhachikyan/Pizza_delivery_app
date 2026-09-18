@@ -3,7 +3,6 @@ class Pizza {
   final String name;
   final String description;
   final String imagePath;
-  // Price in cents.
   final int price;
 
   const Pizza({

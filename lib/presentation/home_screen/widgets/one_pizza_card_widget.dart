@@ -34,6 +34,8 @@ class OnePizzaCardWidget extends StatelessWidget {
 
     return Card(
       margin: EdgeInsets.zero,
+      color: const Color(0xFFFFF9E6),
+      surfaceTintColor: Colors.transparent,
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -83,6 +85,10 @@ class OnePizzaCardWidget extends StatelessWidget {
               child: quantity == 0
                   ? ElevatedButton(
                       onPressed: onAdd,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFC64F00),
+                        foregroundColor: Colors.white,
+                      ),
                       child: const Text('Add'),
                     )
                   : Row(
@@ -91,6 +97,7 @@ class OnePizzaCardWidget extends StatelessWidget {
                       children: [
                         IconButton(
                           tooltip: 'Remove one',
+                          color: const Color(0xFFC64F00),
                           onPressed: onMinus,
                           icon: const Icon(Icons.remove),
                         ),
@@ -102,6 +109,7 @@ class OnePizzaCardWidget extends StatelessWidget {
                         ),
                         IconButton(
                           tooltip: 'Add one',
+                          color: const Color(0xFFC64F00),
                           onPressed: onAdd,
                           icon: const Icon(Icons.add),
                         ),
