@@ -25,3 +25,5 @@ class SubmitLoginEvent extends PizzaEvents {
     required this.password,
   });
 }
+
+class SignOutEvent extends PizzaEvents {}

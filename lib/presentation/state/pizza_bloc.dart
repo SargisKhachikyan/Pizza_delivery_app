@@ -67,7 +67,11 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
     });
 
     on<SubmitLoginEvent>(_submitLogin);
+    on<SignOutEvent>(_signOut);
   }
+
+  String get userEmail =>
+      (_auth ?? FirebaseAuth.instance).currentUser?.email ?? 'No email';
 
   int calculateTotal(Map<int, int> quantities) {
     int total = 0;
@@ -120,6 +124,33 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
       emit(state.copyWith(
         loginStatus: LoginStatusEnum.failure,
         error: 'Something went wrong. Please try again.',
+      ));
+    }
+  }
+
+  Future<void> _signOut(
+    SignOutEvent event,
+    Emitter<PizzaState> emit,
+  ) async {
+    if (state.isLoading) return;
+
+    emit(state.copyWith(
+      loginStatus: LoginStatusEnum.loading,
+      clearError: true,
+    ));
+
+    try {
+      await (_auth ?? FirebaseAuth.instance).signOut();
+
+      emit(state.copyWith(
+        loginStatus: LoginStatusEnum.success,
+        isLogin: true,
+        clearError: true,
+      ));
+    } catch (_) {
+      emit(state.copyWith(
+        loginStatus: LoginStatusEnum.failure,
+        error: 'Unable to sign out. Please try again.',
       ));
     }
   }
