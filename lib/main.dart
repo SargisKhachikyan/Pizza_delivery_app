@@ -1,4 +1,5 @@
 import 'package:decision_jar_project/firebase_options.dart';
+import 'package:decision_jar_project/service/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await NotificationService.instance.init();
 
   runApp(const MyApp());
 }

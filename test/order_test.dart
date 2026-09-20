@@ -59,6 +59,42 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Delete individual and all orders without changing basket',
+      (tester) async {
+    final bloc = PreviewPizzaBloc();
+    addTearDown(bloc.close);
+    for (var i = 0; i < 2; i++) {
+      bloc.add(AddPizzaEvent(pizzas.first.id));
+      await tester.pump();
+      bloc.add(PlaceOrderEvent());
+      await tester.pump();
+    }
+    bloc.add(AddPizzaEvent(pizzas.first.id));
+    await tester.pump();
+    final retainedId = bloc.state.orders.last.id;
+    final deletedId = bloc.state.orders.first.id;
+    await tester.pumpWidget(BlocProvider<PizzaBloc>.value(
+      value: bloc,
+      child: const MaterialApp(home: ProfileScreen()),
+    ));
+    await tester.tap(find.byTooltip('Delete order #$deletedId'));
+    await tester.pumpAndSettle();
+    expect(bloc.state.orders.single.id, retainedId);
+    expect(find.text('Order #$deletedId'), findsNothing);
+    await tester.pump(const Duration(seconds: 15));
+    expect(bloc.state.orders.single.stage, OrderStage.preparing);
+    await tester.tap(find.text('Delete all orders'));
+    await tester.pumpAndSettle();
+    expect(bloc.state.orders, isEmpty);
+    expect(find.text('No orders yet.'), findsOneWidget);
+    expect(find.text('Delete all orders'), findsNothing);
+    await tester.pump(const Duration(seconds: 60));
+    expect(bloc.state.orders, isEmpty);
+    expect(bloc.state.totalQuantity, 1);
+    expect(bloc.state.totalPrice, pizzas.first.price);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Profile preview', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;

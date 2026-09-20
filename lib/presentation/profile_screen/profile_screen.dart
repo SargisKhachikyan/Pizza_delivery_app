@@ -65,9 +65,28 @@ class ProfileScreen extends StatelessWidget {
                   if (state.orders.isNotEmpty) ...[
                     Text('Your orders',
                         style: Theme.of(context).textTheme.titleLarge),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => context
+                            .read<PizzaBloc>()
+                            .add(DeleteAllOrdersEvent()),
+                        icon: const Icon(Icons.delete_sweep_outlined),
+                        label: const Text('Delete all orders'),
+                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      ),
+                    ),
                     const SizedBox(height: 12),
-                    for (final order in state.orders) OrderCard(order: order),
-                  ],
+                    for (final order in state.orders)
+                      OrderCard(
+                        key: ValueKey(order.id),
+                        order: order,
+                        onDelete: () => context
+                            .read<PizzaBloc>()
+                            .add(DeleteOrderEvent(order.id)),
+                      ),
+                  ] else
+                    const Text('No orders yet.'),
                   const SizedBox(height: 24),
                   OutlinedButton.icon(
                     onPressed: state.isLoading

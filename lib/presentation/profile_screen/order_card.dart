@@ -5,9 +5,10 @@ import '../../data/pizza_order.dart';
 import '../home_screen/widgets/botomsheet_widget.dart';
 
 class OrderCard extends StatelessWidget {
-  const OrderCard({super.key, required this.order});
+  const OrderCard({super.key, required this.order, required this.onDelete});
 
   final PizzaOrder order;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +29,12 @@ class OrderCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleMedium),
                 ),
                 Text(formatPrice(order.totalPrice)),
+                IconButton(
+                  onPressed: onDelete,
+                  tooltip: 'Delete order #${order.id}',
+                  icon: const Icon(Icons.delete_outline),
+                  color: Colors.red,
+                ),
               ],
             ),
             const SizedBox(height: 8),

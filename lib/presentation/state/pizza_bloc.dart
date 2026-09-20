@@ -84,6 +84,23 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
       });
     });
 
+    on<DeleteOrderEvent>((event, emit) {
+      _orderTimers.remove(event.orderId)?.cancel();
+      emit(state.copyWith(
+        orders: List.unmodifiable(
+          state.orders.where((order) => order.id != event.orderId),
+        ),
+      ));
+    });
+
+    on<DeleteAllOrdersEvent>((event, emit) {
+      for (final timer in _orderTimers.values) {
+        timer.cancel();
+      }
+      _orderTimers.clear();
+      emit(state.copyWith(orders: const []));
+    });
+
     on<AdvanceOrderEvent>((event, emit) {
       final orders = state.orders.map((order) {
         if (order.id != event.orderId ||
