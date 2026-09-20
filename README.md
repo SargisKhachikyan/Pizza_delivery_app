@@ -119,3 +119,9 @@ flutter test
 ## Author
 
 [Sargis Khachikyan](https://github.com/SargisKhachikyan)
+
+<img width="393" height="800" alt="1" src="https://github.com/user-attachments/assets/4816c7b7-771a-4dba-8ecc-52e9fdb02c71" />
+<img width="391" height="790" alt="2" src="https://github.com/user-attachments/assets/d43dee25-111d-4d00-8019-00d20465a660" />
+<img width="387" height="810" alt="3" src="https://github.com/user-attachments/assets/15ddcdb8-e84c-402c-8871-f438f6966a83" />
+<img width="388" height="810" alt="4" src="https://github.com/user-attachments/assets/bf880674-0c77-4f3b-b979-da831865c759" />
+
