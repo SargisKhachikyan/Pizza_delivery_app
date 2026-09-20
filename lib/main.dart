@@ -1,10 +1,12 @@
 import 'package:decision_jar_project/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'data/pizza_data.dart';
 import 'presentation/state/pizza_bloc.dart';
 import 'presentation/home_screen/home_page.dart';
+import 'presentation/login_screen/login_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +35,29 @@ class MyApp extends StatelessWidget {
             foregroundColor: Colors.white,
           ),
         ),
-        home: const HomePage(),
+        home: StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return const Scaffold(
+                body: Center(
+                  child: Text(
+                      'Unable to check authentication. Please restart the app.'),
+                ),
+              );
+            }
+
+            return snapshot.data == null
+                ? const LoginScreen()
+                : const HomePage();
+          },
+        ),
       ),
     );
   }
