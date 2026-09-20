@@ -1,10 +1,10 @@
-import 'order_card.dart';
+import 'package:decision_jar_project/presentation/state/pizza_bloc.dart';
+import 'package:decision_jar_project/presentation/state/pizza_bloc_events.dart';
+import 'package:decision_jar_project/presentation/state/pizza_bloc_states.dart';
+
+import 'widgets/order_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../state/pizza_bloc.dart';
-import '../state/pizza_bloc_events.dart';
-import '../state/pizza_bloc_states.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -73,7 +73,8 @@ class ProfileScreen extends StatelessWidget {
                             .add(DeleteAllOrdersEvent()),
                         icon: const Icon(Icons.delete_sweep_outlined),
                         label: const Text('Delete all orders'),
-                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                        style:
+                            TextButton.styleFrom(foregroundColor: Colors.red),
                       ),
                     ),
                     const SizedBox(height: 12),

@@ -1,8 +1,11 @@
 import 'dart:async';
 
-import '../../data/pizza_order.dart';
+import 'package:decision_jar_project/data/pizza_order.dart';
+import 'package:decision_jar_project/service/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+
 
 import 'pizza_bloc_events.dart';
 import 'pizza_bloc_states.dart';
@@ -10,6 +13,7 @@ import 'pizza_bloc_states.dart';
 class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
   final Map<int, int> prices;
   final FirebaseAuth? _auth;
+
   final Map<int, Timer> _orderTimers = {};
   int _nextOrderId = 1;
 
@@ -86,6 +90,7 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
 
     on<DeleteOrderEvent>((event, emit) {
       _orderTimers.remove(event.orderId)?.cancel();
+
       emit(state.copyWith(
         orders: List.unmodifiable(
           state.orders.where((order) => order.id != event.orderId),
@@ -97,11 +102,15 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
       for (final timer in _orderTimers.values) {
         timer.cancel();
       }
+
       _orderTimers.clear();
+
       emit(state.copyWith(orders: const []));
     });
 
-    on<AdvanceOrderEvent>((event, emit) {
+    on<AdvanceOrderEvent>((event, emit) async {
+      int? deliveredOrderId;
+
       final orders = state.orders.map((order) {
         if (order.id != event.orderId ||
             order.stage == OrderStage.delivered) {
@@ -112,12 +121,30 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
 
         if (updated.stage == OrderStage.delivered) {
           _orderTimers.remove(order.id)?.cancel();
+
+          // ДОБАВЛЕНО: запоминаем заказ для уведомления.
+          deliveredOrderId = order.id;
         }
 
         return updated;
       }).toList();
 
-      emit(state.copyWith(orders: List.unmodifiable(orders)));
+      // Сначала обновляем состояние и карточку заказа.
+      emit(state.copyWith(
+        orders: List.unmodifiable(orders),
+      ));
+
+      // ДОБАВЛЕНО: показываем уведомление после доставки.
+      final orderId = deliveredOrderId;
+
+      if (orderId != null) {
+        try {
+          await NotificationService.instance.showOrderDelivered(orderId);
+        } catch (error, stackTrace) {
+          // Ошибка уведомления не отменяет доставку.
+          addError(error, stackTrace);
+        }
+      }
     });
 
     on<ToggleLoginModeEvent>((event, emit) {
@@ -243,20 +270,28 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
       case 'user-not-found':
       case 'wrong-password':
         return 'Incorrect email or password.';
+
       case 'email-already-in-use':
         return 'This email is already registered.';
+
       case 'weak-password':
         return 'Please choose a stronger password.';
+
       case 'invalid-email':
         return 'Please enter a valid email address.';
+
       case 'network-request-failed':
         return 'Please check your internet connection.';
+
       case 'too-many-requests':
         return 'Too many attempts. Please try again later.';
+
       case 'user-disabled':
         return 'This account has been disabled.';
+
       case 'operation-not-allowed':
         return 'Email and password sign-in is currently unavailable.';
+
       default:
         return 'Authentication failed. Please try again.';
     }

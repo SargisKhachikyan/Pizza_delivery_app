@@ -4,14 +4,14 @@ import 'package:decision_jar_project/presentation/home_screen/widgets/botomsheet
 import 'package:flutter/material.dart';
 
 class OrderCard extends StatelessWidget {
-  const OrderCard({super.key, required this.order});
+  const OrderCard({super.key, required this.order, required this.onDelete});
 
   final PizzaOrder order;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
     const orange = Color(0xFFE64A19);
-
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
@@ -24,28 +24,28 @@ class OrderCard extends StatelessWidget {
                 const Icon(Icons.local_pizza_outlined, color: orange),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    'Order #${order.id}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  child: Text('Order #${order.id}',
+                      style: Theme.of(context).textTheme.titleMedium),
                 ),
                 Text(formatPrice(order.totalPrice)),
+                IconButton(
+                  onPressed: onDelete,
+                  tooltip: 'Delete order #${order.id}',
+                  icon: const Icon(Icons.delete_outline),
+                  color: Colors.red,
+                ),
               ],
             ),
             const SizedBox(height: 8),
+            const Text('Demo tracking', style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 8),
             for (final pizza in pizzas)
               if (order.quantities.containsKey(pizza.id))
                 Text('${order.quantities[pizza.id]} × ${pizza.name}'),
             const Divider(height: 28),
-            Text(
-              order.stage.title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: orange,
-              ),
-            ),
+            Text(order.stage.title,
+                style: const TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.bold, color: orange)),
             const SizedBox(height: 6),
             Text(order.stage.description),
             const SizedBox(height: 20),
@@ -70,17 +70,15 @@ class OrderCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        stage.title,
-                        style: TextStyle(
-                          fontWeight: stage == order.stage
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: stage.index <= order.stage.index
-                              ? null
-                              : Colors.grey,
-                        ),
-                      ),
+                      child: Text(stage.title,
+                          style: TextStyle(
+                            fontWeight: stage == order.stage
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: stage.index <= order.stage.index
+                                ? null
+                                : Colors.grey,
+                          )),
                     ),
                   ],
                 ),
