@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import '../../data/pizza_order.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,10 +10,13 @@ import 'pizza_bloc_states.dart';
 class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
   final Map<int, int> prices;
   final FirebaseAuth? _auth;
+  final Map<int, Timer> _orderTimers = {};
+  int _nextOrderId = 1;
 
   PizzaBloc({
     required this.prices,
     FirebaseAuth? auth,
+    Duration demoStageDuration = const Duration(seconds: 15),
   })  : _auth = auth,
         super(PizzaState()) {
     on<AddPizzaEvent>((event, emit) {
@@ -54,6 +60,47 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
         quantities: {},
         totalPrice: 0,
       ));
+    });
+
+    on<PlaceOrderEvent>((event, emit) {
+      if (state.totalQuantity == 0) return;
+
+      final order = PizzaOrder(
+        id: _nextOrderId++,
+        quantities: state.quantities,
+        totalPrice: state.totalPrice,
+        placedAt: DateTime.now(),
+      );
+
+      emit(state.copyWith(
+        quantities: {},
+        totalPrice: 0,
+        orders: List.unmodifiable([order, ...state.orders]),
+        status: PizzaStatusEnum.updated,
+      ));
+
+      _orderTimers[order.id] = Timer.periodic(demoStageDuration, (_) {
+        add(AdvanceOrderEvent(order.id));
+      });
+    });
+
+    on<AdvanceOrderEvent>((event, emit) {
+      final orders = state.orders.map((order) {
+        if (order.id != event.orderId ||
+            order.stage == OrderStage.delivered) {
+          return order;
+        }
+
+        final updated = order.advance();
+
+        if (updated.stage == OrderStage.delivered) {
+          _orderTimers.remove(order.id)?.cancel();
+        }
+
+        return updated;
+      }).toList();
+
+      emit(state.copyWith(orders: List.unmodifiable(orders)));
     });
 
     on<ToggleLoginModeEvent>((event, emit) {
@@ -142,9 +189,18 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
     try {
       await (_auth ?? FirebaseAuth.instance).signOut();
 
+      for (final timer in _orderTimers.values) {
+        timer.cancel();
+      }
+
+      _orderTimers.clear();
+
       emit(state.copyWith(
         loginStatus: LoginStatusEnum.success,
         isLogin: true,
+        orders: [],
+        quantities: {},
+        totalPrice: 0,
         clearError: true,
       ));
     } catch (_) {
@@ -153,6 +209,15 @@ class PizzaBloc extends Bloc<PizzaEvents, PizzaState> {
         error: 'Unable to sign out. Please try again.',
       ));
     }
+  }
+
+  @override
+  Future<void> close() {
+    for (final timer in _orderTimers.values) {
+      timer.cancel();
+    }
+
+    return super.close();
   }
 
   String _errorMessage(String code) {

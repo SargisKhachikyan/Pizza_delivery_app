@@ -1,3 +1,4 @@
+import 'order_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -38,8 +39,7 @@ class ProfileScreen extends StatelessWidget {
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              child: ListView(
                 children: [
                   Row(
                     children: [
@@ -61,7 +61,14 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 28),
+                  if (state.orders.isNotEmpty) ...[
+                    Text('Your orders',
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 12),
+                    for (final order in state.orders) OrderCard(order: order),
+                  ],
+                  const SizedBox(height: 24),
                   OutlinedButton.icon(
                     onPressed: state.isLoading
                         ? null

@@ -27,3 +27,10 @@ class SubmitLoginEvent extends PizzaEvents {
 }
 
 class SignOutEvent extends PizzaEvents {}
+
+class PlaceOrderEvent extends PizzaEvents {}
+
+class AdvanceOrderEvent extends PizzaEvents {
+  final int orderId;
+  AdvanceOrderEvent(this.orderId);
+}
